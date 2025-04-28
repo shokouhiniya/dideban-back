@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { LoginDto, RegisterDto } from './auth.dto';
+import { AuthInterface } from './auth.interface';
 
 @Injectable()
 export class AuthService {
@@ -7,6 +8,10 @@ export class AuthService {
     console.log(loginDto);
 
     return 'Login';
+  }
+
+  generateToken(entity: AuthInterface) {
+    console.log(entity);
   }
 
   register(registerDto: RegisterDto): string {

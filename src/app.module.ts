@@ -1,26 +1,25 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { LoggerMiddleware } from './logger/logger.middleware';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-
-const TypeOrmDb = TypeOrmModule.forRoot({
-  type: 'mysql',
-  host: 'localhost',
-  port: 3306,
-  username: 'root',
-  password: 'root',
-  database: 'test',
-  autoLoadEntities: true,
-  synchronize: true,
-});
+import { AuthModule } from './modules/auth/auth.module';
+import { DatabaseModule } from './libs/database/database.module';
+import { LoggerMiddleware } from './libs/logger/logger.middleware';
+import { ConfigModule } from './libs/config/config.module';
+import { UserModule } from './modules/user/user.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ResponseInterceptor } from './response.interceptor';
 
 @Module({
-  imports: [AuthModule, AuthModule, TypeOrmDb],
+  imports: [AuthModule, DatabaseModule, ConfigModule, UserModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor, // Use the response interceptor globally
+    },
+  ],
 })
 export class AppModule implements NestModule {
   constructor(private dataSource: DataSource) {}
