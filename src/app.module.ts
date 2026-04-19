@@ -14,6 +14,8 @@ import { StatementModule } from './modules/statement/statement.module';
 import { ScoreModule } from './modules/score/score.module';
 import { SubmissionModule } from './modules/submission/submission.module';
 import { VerificationModule } from './modules/verification/verification.module';
+import { AiModule } from './modules/ai/ai.module';
+import { ProfileModule } from './modules/profile/profile.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './libs/interceptors/response.interceptor';
 
@@ -30,6 +32,8 @@ import { ResponseInterceptor } from './libs/interceptors/response.interceptor';
     ScoreModule,
     SubmissionModule,
     VerificationModule,
+    AiModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [
