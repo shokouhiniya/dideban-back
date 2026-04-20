@@ -1,26 +1,47 @@
+import { join } from 'path';
+
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.setGlobalPrefix('api');
+
+  // Serve uploaded files (politician avatars, etc.)
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
 
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // Transform DTO to plain object
-      // whitelist: true, // Strip out properties that are not in the DTO
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000, process.env.HOST ?? 'localhost');
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3033',
+    credentials: true,
+  });
+
+  const config = new DocumentBuilder()
+    .setTitle('Dideban API')
+    .setDescription('Smart Political Stance Monitoring Platform')
+    .setVersion('0.1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
+
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`Dideban API running on http://localhost:${port}`);
+  console.log(`Swagger docs at http://localhost:${port}/docs`);
 }
 
-bootstrap()
-  .then(() => {
-    console.log(
-      `Server is running on http://${process.env.HOST ?? 'localhost'}:${process.env.PORT ?? 3000}`,
-    );
-  })
-  .catch((err) => {
-    console.log('error in running server', err);
-  });
+bootstrap();
